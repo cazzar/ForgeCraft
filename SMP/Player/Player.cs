@@ -58,10 +58,21 @@ namespace SMP
 		//Events for Custom Command and Plugins ------------------------------------
 		public delegate void OnPlayerConnect(Player p);
 		public delegate void OnPlayerAuth(Player p);
-		public event OnPlayerConnect PlayerConnect;
-		public event OnPlayerAuth PlayerAuth;
+		public static event OnPlayerConnect PlayerConnect;
+		public event OnPlayerAuth OnAuth;
+        public static event OnPlayerAuth PlayerAuth;
 		public delegate void OnPlayerChat(string message, Player p);
+        public event OnPlayerChat OnChat;
+        public static event OnPlayerChat PlayerChat;
 		public delegate void OnPlayerCommand(string cmd, string message, Player p);
+        public event OnPlayerCommand OnCommand;
+        public static event OnPlayerCommand PlayerCommand;
+        public delegate void OnPlayerDisconnect(Player p, string reason);
+        public static event OnPlayerDisconnect PlayerDisconnect;
+        public event OnPlayerDisconnect OnDisconnect;
+        public delegate void OnPlayerRespawn(Player p);
+        public static event OnPlayerRespawn PlayerRespawn;
+        public event OnPlayerRespawn OnRespawn;
 		//Other things for plugins ----------
         public bool cancelBlock = false;
         public bool cancelchat = false;
@@ -917,6 +928,15 @@ namespace SMP
 		#region INCOMING
 			void HandleCommand(string cmd, string message)
 		{
+            if (OnCommand != null)
+                OnCommand(cmd, message, this);
+            if (PlayerCommand != null)
+                PlayerCommand(cmd, message, this);
+            if (cancelcommand)
+            {
+                cancelcommand = false;
+                return;
+            }
 		  	Command command = Command.all.Find(cmd);
             if (command == null)
             {
@@ -1185,7 +1205,12 @@ namespace SMP
             if (LoggedIn)
                 GlobalMessage("§5" + username + " §fhas disconnected.");
             LoggedIn = false;
-			
+            
+            //TODO: Add kick reason for custom kick messages...if possible :3
+            if (OnDisconnect != null)
+                OnDisconnect(this, "");
+            if (PlayerDisconnect != null)
+                PlayerDisconnect(this, "");
 			//TODO: Despawn
 			this.Dispose();
 		}

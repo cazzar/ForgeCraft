@@ -93,6 +93,8 @@ namespace SMP
 			
 			if (PlayerAuth != null)
 				PlayerAuth(this);
+            if (OnAuth != null)
+                OnAuth(this);
 		}
 
         private void UpdateShi(Player p)
@@ -163,7 +165,15 @@ namespace SMP
 					HandleCommand("msg", m.Substring(2));
 				}
 			}
-
+            if (OnChat != null)
+                OnChat(m, this);
+            if (PlayerChat != null)
+                PlayerChat(m, this);
+            if (cancelchat)
+            {
+                cancelchat = false;
+                return;
+            }
             // TODO: Rank coloring
             //GlobalMessage(this.PlayerColor + "{1}§f: {2}", WrapMethod.Chat, this.Prefix, Username, message);
 			if (!DoNotDisturb)
@@ -340,7 +350,11 @@ namespace SMP
 
                 if (OnBlockChange != null)
                     OnBlockChange(this, x, y, z, rc);
-
+                if (cancelBlock)
+                {
+                    cancelBlock = false;
+                    return;
+                }
                 if (Server.mode == 1) level.BlockChange(x, y, z, 0, 0);
 			}
 			if (message[0] == 2)
@@ -472,6 +486,11 @@ namespace SMP
 
             if (OnBlockChange != null)
                 OnBlockChange(this, blockX, blockY, blockZ, blockID);
+            if (cancelBlock)
+            {
+                cancelBlock = false;
+                return;
+            }
 
 			if (blockID == -1)
 			{
@@ -653,6 +672,10 @@ namespace SMP
 		}
         public void HandleRespawn(byte[] message)
         {
+            if (OnRespawn != null)
+                OnRespawn(this);
+            if (PlayerRespawn != null)
+                PlayerRespawn(this);
             SendRespawn();
         }
 		public short BlockDropSwitch(short id)
